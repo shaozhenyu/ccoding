@@ -177,6 +177,22 @@ struct BSTree* delete(struct BSTree *root, int val)
 	return root;
 }
 
+struct TreeNode* lowestCommonAncestor(struct TreeNode* root, struct TreeNode* p, struct TreeNode* q) {
+
+	if (!root || !p || !q)
+		return NULL;
+
+	if (p->val <= root->val && q->val >= root->val)
+		return root;
+	if (p->val >= root->val && q->val <= root->val)
+		return root;
+	if (p->val <= root->val && q->val <= root->val && root->left)
+		return lowestCommonAncestor(root->left, p, q);
+	if (p->val >= root->val && q->val >= root->val && root->right)
+		return lowestCommonAncestor(root->right, p, q);
+	return NULL;
+}
+
 int main()
 {
 	int len = 10;
