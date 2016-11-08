@@ -249,40 +249,52 @@ int nullNodeSize(struct TreeNode *root) {
 void writeBuff(struct TreeNode* root, char** buf, int size, int flag) {
 	if (root) {
 		if (flag != 0) {
-			sprintf(buf[size], "%s->%d", buf[size], root->val);
-			printf("%s ---%d --- %d \n", buf[size], root->val, size);
+			printf("a\n");
+			char string[1000];
+			sprintf(string, "%s->%d", buf[size], root->val);
+			strcpy(buf[size], string);
+			printf("%s %d %d\n", buf[size], root->val, size);
+			printf("b\n");
 		}
 		if (root->left && root->right) {
-			buf[size+1] = buf[size];
-			printf("111 %s %s \n", buf[size], buf[size+1]);
+			char tmp[1000];
+			strcpy(tmp, buf[size]);
+			printf("111 %s %s\n", buf[size], tmp);
 			writeBuff(root->left, buf, size, 1);
-			writeBuff(root->right, buf, size+1, 1);
+			printf("size : %d  bufSize : %d tmp : %s -- %s\n", size, bufSize, tmp, buf[bufSize]);
+			bufSize++;
+			printf("bufsize : %d\n", bufSize);
+			strcpy(buf[bufSize], tmp);
+			printf("222 %s %s\n", buf[bufSize], tmp);
+			writeBuff(root->right, buf, bufSize, 1);
 		} else if (root->left && !root->right) {
+			printf("aaaaaa\n");
 			writeBuff(root->left, buf, size, 1);
 		} else if (root->right && !root->left) {
+			printf("bbbbbb\n");
 			writeBuff(root->right, buf, size, 1);
 		}
 	}
 }
 
 char** binaryTreePaths(struct TreeNode* root, int *returnSize) {
+	bufSize = 0;
 	if (root) {
+		int i;
 		int size = nullNodeSize(root);
 		*returnSize = size;
-		char **buf = (char **)malloc(size * sizeof(char *));
+		printf("size : %d\n", size);
+		char **buf = (char **)malloc(size * sizeof(char));
 		if (!buf)
 			return NULL;
-		char *string;
-		sprintf(string, "%d", root->val);
-		//printf("%s-----\n", buf[0]);
-		buf[0] = string;
-		writeBuff(root, buf, 0, 0);
-		int i;
-		printf("----- %d\n", *returnSize);
-		for (i = 0; i < *returnSize; i++) {
-			printf("%s\n", buf[i]);
+		for (i = 0; i < size; i++) {
+			buf[i] = (char *)malloc(sizeof(char) * 1000);
+			if (!buf[i])
+				return NULL;
 		}
-		printf("\n");
+		sprintf(buf[0], "%d", root->val);
+		writeBuff(root, buf, 0, 0);
+		printf("end!!!!!\n");
 		return buf;
 	}
 	return NULL;
@@ -295,8 +307,7 @@ int main()
 	int i, size = 0;
 	char **buf = binaryTreePaths(root, &size);
 	printf("222222222 : %d\n", size);
-	printf("%s\n", buf[0]);
-	printf("%s\n", buf[1]);
+	//printf("%s\n", buf[1]);
 	for (i = 0; i < size; i++) {
 		printf("%s\n", buf[i]);
 	}
