@@ -47,7 +47,7 @@ struct BSTree* insertBST(struct BSTree *root, int val)
 }
 
 //非递归插入
-void insertBST1(struct BSTree *root, int val)
+void insertBST1(struct BSTree **root, int val)
 {
 	struct BSTree *p;
 	p = (struct BSTree *)malloc(sizeof(struct BSTree));
@@ -56,10 +56,10 @@ void insertBST1(struct BSTree *root, int val)
 	p->val = val;
 	p->left = p->right = NULL;
 
-	if (!root) {
-		root = p;
+	if (!(*root)) {
+		*root = p;
 	} else {
-		struct BSTree *q = root;
+		struct BSTree *q = *root;
 		while (q->left != p && q->right != p) {
 			if (val == q->val)
 				return;
@@ -84,7 +84,8 @@ struct BSTree *createBST(int a[], int len)
 	struct BSTree *root = NULL;
 	int i;
 	for (i = 0; i < len; i++) {
-		root = insertBST(root, a[i]);
+		//root = insertBST(root, a[i]);
+		insertBST1(&root, a[i]);
 	}
 
 	return root;
@@ -94,13 +95,13 @@ int putVal(struct BSTree *root, int oldVal, int newVal)
 {
 	if (!root)
 		return 0;
-	
 	if (oldVal < root->val)
 		return putVal(root->left, oldVal, newVal);
 	else if (oldVal > root->val)
 		return putVal(root->right, oldVal, newVal);
 	else
 		root->val = newVal;
+	return 0;
 }
 
 struct BSTree* min(struct BSTree *root)
@@ -177,7 +178,7 @@ struct BSTree* delete(struct BSTree *root, int val)
 	return root;
 }
 
-struct TreeNode* lowestCommonAncestor(struct TreeNode* root, struct TreeNode* p, struct TreeNode* q) {
+struct BSTree* lowestCommonAncestor(struct BSTree* root, struct BSTree* p, struct BSTree* q) {
 
 	if (!root || !p || !q)
 		return NULL;
@@ -193,17 +194,54 @@ struct TreeNode* lowestCommonAncestor(struct TreeNode* root, struct TreeNode* p,
 	return NULL;
 }
 
+void insertBalance(struct BSTree** root, int* nums, int numsSize) {
+	if (numsSize == 0)
+		return;
+
+	int p, left, right;
+	if (numsSize%2 == 0) {
+		p = numsSize/2;
+		insertBST1(root, nums[p]);
+		if (p == 0) {
+			return;
+		}
+		if (root) {
+			insertBalance(&(*root)->left, nums, p);
+			insertBalance(&(*root)->right, nums+p+1, numsSize-p-1);
+		}
+	} else {
+		if (numsSize == 1) {
+			p = 0;
+		} else {
+			p = numsSize/2;
+		}
+		insertBST1(root, nums[p]);
+		if (p == 0) {
+			return;
+		}
+		if (root) {
+			insertBalance(&(*root)->left, nums, p);
+			insertBalance(&(*root)->right, nums+p+1, p);
+		}
+	}
+}
+
+struct BSTree* sortedArrayToBST(int* nums, int numsSize) {
+	int i;
+	struct BSTree *root = NULL;
+	insertBalance(&root, nums, numsSize);
+	return root;
+}
 int main()
 {
 	int len = 10;
 	int a[] = {4, 15, 18, 1, 13, 7, 2, 9, 0, 16};
+	int b[] = {1, 2, 3, 4, 5, 6, 7, 8};
 
-	struct BSTree *root = createBST(a, 10);
-	inOrderTraverse(root);
+	struct BSTree *root = sortedArrayToBST(b, 8);
+
+	//struct BSTree *root = createBST(a, 10);
 	printf("\n");
-	//preOrderTraverse(root);
-	//printf("\n");
-	root = delete(root, 4);
-	inOrderTraverse(root);
+	preOrderTraverse(root);
 	printf("\n");
 }
