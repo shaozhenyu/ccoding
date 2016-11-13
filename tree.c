@@ -291,14 +291,55 @@ char** binaryTreePaths(struct TreeNode* root, int *returnSize) {
 	return NULL;
 }
 
+//TODO
+int* rightSideView(struct TreeNode* root, int* returnSize) {
+	if (root == NULL)
+		return 0;
+	int i = 0;
+	int *nums;
+	nums = (int *)malloc(100 * sizeof(int));
+	struct TreeNode *p = root;
+	while (p) {
+		nums[i++] = p->val;
+		if (p->right)
+			p = p->right;
+		else
+			p = p->left;
+	}
+	*returnSize = i;
+	return nums;
+}
+
+int printNodeAtLevel(struct TreeNode *root, int level) {
+	if (!root || level < 0)
+		return 0;
+	if (level == 0) {
+		printf("%d ", root->val);
+		return 1;
+	}
+	return printNodeAtLevel(root->left, level-1) + printNodeAtLevel(root->right, level-1);
+}
+
+int printNodeByLevel(struct TreeNode *root) {
+	int level;
+	for (level = 0; ; level++) {
+		if (!printNodeAtLevel(root, level))
+			break;
+		printf("\n");
+	}
+	printf("\n");
+	return 0;
+}
+
 int main()
 {
 	struct TreeNode *root;
 	root = createTree();
-	int i, size = 0;
-	char **buf = binaryTreePaths(root, &size);
-	for (i = 0; i < size; i++) {
-		printf("%s\n", buf[i]);
-	}
+	//int i, size = 0;
+	//int *a = rightSideView(root, &size);
+	//for (i = 0; i < size; i++)
+	//	printf("%d ", a[i]);
+	//printNodeAtLevel(root, 2);
+	printNodeByLevel(root);
 	printf("\n");
 }

@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct BSTree {
+struct TreeNode {
 	int val;
-	struct BSTree *left;
-	struct BSTree *right;
+	struct TreeNode *left;
+	struct TreeNode *right;
 };
 
-void preOrderTraverse(struct BSTree *root)
+void preOrderTraverse(struct TreeNode *root)
 {
 	if (root) {
 		printf("%d ", root->val);
@@ -16,7 +16,7 @@ void preOrderTraverse(struct BSTree *root)
 	}
 }
 
-void inOrderTraverse(struct BSTree *root)
+void inOrderTraverse(struct TreeNode *root)
 {
 	if (root) {
 		inOrderTraverse(root->left);
@@ -26,10 +26,10 @@ void inOrderTraverse(struct BSTree *root)
 }
 
 //递归插入
-struct BSTree* insertBST(struct BSTree *root, int val)
+struct TreeNode* insertBST(struct TreeNode *root, int val)
 {
 	if (root == NULL) {
-		root = (struct BSTree *)malloc(sizeof(struct BSTree));
+		root = (struct TreeNode *)malloc(sizeof(struct TreeNode));
 		if (!root)
 			return NULL;
 		root->val = val;
@@ -47,10 +47,10 @@ struct BSTree* insertBST(struct BSTree *root, int val)
 }
 
 //非递归插入
-void insertBST1(struct BSTree **root, int val)
+void insertBST1(struct TreeNode **root, int val)
 {
-	struct BSTree *p;
-	p = (struct BSTree *)malloc(sizeof(struct BSTree));
+	struct TreeNode *p;
+	p = (struct TreeNode *)malloc(sizeof(struct TreeNode));
 	if (!p)
 		return;
 	p->val = val;
@@ -59,7 +59,7 @@ void insertBST1(struct BSTree **root, int val)
 	if (!(*root)) {
 		*root = p;
 	} else {
-		struct BSTree *q = *root;
+		struct TreeNode *q = *root;
 		while (q->left != p && q->right != p) {
 			if (val == q->val)
 				return;
@@ -79,9 +79,9 @@ void insertBST1(struct BSTree **root, int val)
 	}
 }
 
-struct BSTree *createBST(int a[], int len)
+struct TreeNode *createBST(int a[], int len)
 {
-	struct BSTree *root = NULL;
+	struct TreeNode *root = NULL;
 	int i;
 	for (i = 0; i < len; i++) {
 		//root = insertBST(root, a[i]);
@@ -91,7 +91,7 @@ struct BSTree *createBST(int a[], int len)
 	return root;
 }
 
-int putVal(struct BSTree *root, int oldVal, int newVal)
+int putVal(struct TreeNode *root, int oldVal, int newVal)
 {
 	if (!root)
 		return 0;
@@ -104,12 +104,12 @@ int putVal(struct BSTree *root, int oldVal, int newVal)
 	return 0;
 }
 
-struct BSTree* min(struct BSTree *root)
+struct TreeNode* min(struct TreeNode *root)
 {
 	if (!root)
 		return NULL;
 
-	struct BSTree *p = root;
+	struct TreeNode *p = root;
 
 	while (p->left) {
 		p = p->left;
@@ -117,12 +117,12 @@ struct BSTree* min(struct BSTree *root)
 	return p;
 }
 
-struct BSTree* max(struct BSTree *root)
+struct TreeNode* max(struct TreeNode *root)
 {
 	if (!root)
 		return NULL;
 
-	struct BSTree *p = root;
+	struct TreeNode *p = root;
 
 	while (p->right) {
 		p = p->right;
@@ -130,7 +130,7 @@ struct BSTree* max(struct BSTree *root)
 	return p;
 }
 
-struct BSTree* deleteMin(struct BSTree *root)
+struct TreeNode* deleteMin(struct TreeNode *root)
 {
 	if (!root)
 		return NULL;
@@ -142,7 +142,7 @@ struct BSTree* deleteMin(struct BSTree *root)
 	return root;
 }
 
-struct BSTree* deleteMax(struct BSTree *root)
+struct TreeNode* deleteMax(struct TreeNode *root)
 {
 	if (!root)
 		return NULL;
@@ -154,7 +154,8 @@ struct BSTree* deleteMax(struct BSTree *root)
 	return root;
 }
 
-struct BSTree* delete(struct BSTree *root, int val)
+/*
+struct TreeNode* delete(struct TreeNode *root, int val)
 {
 	if (!root)
 		return NULL;
@@ -169,7 +170,30 @@ struct BSTree* delete(struct BSTree *root, int val)
 		else if (root->right == NULL)
 			return root->left;
 		else {
-			struct BSTree *p = root;
+			struct TreeNode *p = root;
+			root = min(p->right);
+			root->right = deleteMin(p->right);
+			root->left = p->left;
+		}
+	}
+	return root;
+}
+*/
+
+struct TreeNode* deleteNode(struct TreeNode* root, int key) {
+	if (root == NULL)
+		return NULL;
+	if (key < root->val)
+		root->left = deleteNode(root->left, key);
+	else if (key > root->val)
+		root->right = deleteNode(root->right, key);
+	else {
+		if (root->left == NULL)
+			return root->right;
+		else if (root->right == NULL)
+			return root->left;
+		else {
+			struct TreeNode *p = root;
 			root = min(p->right);
 			root->right = deleteMin(p->right);
 			root->left = p->left;
@@ -178,7 +202,7 @@ struct BSTree* delete(struct BSTree *root, int val)
 	return root;
 }
 
-struct BSTree* lowestCommonAncestor(struct BSTree* root, struct BSTree* p, struct BSTree* q) {
+struct TreeNode* lowestCommonAncestor(struct TreeNode* root, struct TreeNode* p, struct TreeNode* q) {
 
 	if (!root || !p || !q)
 		return NULL;
@@ -194,7 +218,7 @@ struct BSTree* lowestCommonAncestor(struct BSTree* root, struct BSTree* p, struc
 	return NULL;
 }
 
-void insertBalance(struct BSTree** root, int* nums, int numsSize) {
+void insertBalance(struct TreeNode** root, int* nums, int numsSize) {
 	if (numsSize == 0)
 		return;
 
@@ -226,9 +250,9 @@ void insertBalance(struct BSTree** root, int* nums, int numsSize) {
 	}
 }
 
-struct BSTree* sortedArrayToBST(int* nums, int numsSize) {
+struct TreeNode* sortedArrayToBST(int* nums, int numsSize) {
 	int i;
-	struct BSTree *root = NULL;
+	struct TreeNode *root = NULL;
 	insertBalance(&root, nums, numsSize);
 	return root;
 }
@@ -238,9 +262,9 @@ int main()
 	int a[] = {4, 15, 18, 1, 13, 7, 2, 9, 0, 16};
 	int b[] = {1, 2, 3, 4, 5, 6, 7, 8};
 
-	struct BSTree *root = sortedArrayToBST(b, 8);
+	struct TreeNode *root = sortedArrayToBST(b, 8);
 
-	//struct BSTree *root = createBST(a, 10);
+	//struct TreeNode *root = createBST(a, 10);
 	printf("\n");
 	preOrderTraverse(root);
 	printf("\n");
