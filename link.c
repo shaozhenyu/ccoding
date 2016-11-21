@@ -41,6 +41,101 @@ int listLen(struct ListNode *h) {
 }
 
 struct ListNode* addTwoNumbers(struct ListNode* l1, struct ListNode* l2) {
+	if (!l1 && !l2)
+		return NULL;
+	if (!l1)
+		return l2;
+	if (!l2)
+		return l1;
+
+	int a[10000] = {0};
+	int b[10000] = {0};
+	int lenA = 1, lenB = 1;
+
+	a[0] = b[0] = 0;
+
+	struct ListNode *p, *q;
+	p = l1;
+	q = l2;
+
+	while (!p && !q) {
+		a[lenA++] = p->val;
+		b[lenB++] = q->val;
+		p = p->next;
+		q = q->next;
+	}
+
+	while (p) {
+		a[lenA++] = p->val;
+		p = p->next;
+	}
+
+	while (q) {
+		b[lenB++] = q->val;
+		q = q->next;
+	}
+
+	int i = lenA - 1;
+	int j = lenB - 1;
+	int add = 0;
+	if (lenA < lenB) {
+		while (i > 0) {
+			b[j] += a[i] + add;
+			if (b[j] >= 10) {
+				add = 1;
+				b[j] -= 10;
+			} else {
+				add = 0;
+			}
+			i--, j--;
+		}
+		while (add == 1) {
+			b[j] += 1;
+			if (b[j] >= 10) {
+				add = 1;
+				b[j] -= 10;
+			} else {
+				add = 0;
+			} 
+			j--;
+		}
+
+		if (b[0] == 1)
+			return create(b, lenB);
+		else
+			return create(b+1, lenB-1);
+	} else {
+		while (j > 0) {
+			a[i] += b[j] + add;
+			if (a[i] >= 10) {
+				add = 1;
+				a[i] -= 10;
+			} else {
+				add = 0;
+			}
+			i--, j--;
+		}
+		while (add == 1) {
+			a[i] += 1;
+			if (a[i] >= 10) {
+				add = 1;
+				a[i] -= 10;
+			} else {
+				add = 0;
+			}
+			i--;
+		}
+
+		if (a[0] == 1)
+			return create(a, lenA);
+		else
+			return create(a+1, lenA-1);
+	}
+
+	return NULL;
+}
+
+struct ListNode* addTwoNumbers1(struct ListNode* l1, struct ListNode* l2) {
 	struct ListNode *p1, *p2;
 	int i = 0;
 	int len, len1, len2;
@@ -510,13 +605,161 @@ int hasCycle(struct ListNode *head) {
 	return 0;
 }
 
+struct ListNode* oddEvenList(struct ListNode* head) {
+	if (!head || !head->next)
+		return NULL;
+
+	int i = 1;
+	struct ListNode *r0 = head;
+	struct ListNode *r1 = head->next;
+	struct ListNode *r = head;
+	struct ListNode *p = head->next;
+	struct ListNode *q = p->next;
+	while (p && q) {
+		if (i%2 == 0) {
+			r0->next = p;
+			p->next = r1;
+			r->next = q;
+
+			r0 = p;
+			r1 = r0->next;
+
+			p = q;
+			q = p->next;
+		} else {
+			r = p;
+			p = p->next;
+			q = p->next;
+		}
+		i++;
+	}
+
+	if (p && !q && (i%2 == 0)) {
+		r0->next = p;
+		p->next = r1;
+		r->next = NULL;
+	}
+
+	return head;
+}
+
+struct ListNode* insertionSortList(struct ListNode* head) {
+	if (!head || !head->next)
+		return head;
+
+	int i = 1;
+	struct ListNode *p = head->next, *pNext, *pPre;
+	struct ListNode *q, *q1;
+	pPre = head;
+	while (p) {
+		pNext = p->next;
+		printList(head);
+		q = head;
+		q1 = head;
+		int j = 0;
+		while (j < i) {
+			if (q->val < p->val) {
+				q1 = q;
+				q = q->next;
+				j++;
+			} else {
+				if (q == head) {
+					p->next = q;
+					pPre->next = pNext;
+					head = p;
+				} else {
+					q1->next = p;
+					p->next = q;
+					pPre->next = pNext;
+				}
+				if (pNext == NULL)
+					return head;
+				p = pNext;
+				pNext = p->next;
+				i++;
+				break;
+			}
+		}
+		if (j < i)
+			continue;
+		pPre = p;
+		p = p->next;
+		//pNext = p->next;
+		i++;
+	}
+	return head;
+}
+
+int isPalindrome1(struct ListNode* head) {
+	if (!head || !head->next)
+		return 1;
+	struct ListNode *fast, *slow;
+	struct ListNode *r;
+	struct ListNode *slowNext;
+	r = NULL;
+	slow = fast = head;
+
+	while (fast && fast->next) {
+		fast = fast->next->next;
+		slowNext = slow->next;
+		slow->next = r;
+		r = slow;
+		slow = slowNext;
+	}
+
+	if (fast) {
+		slow = slow->next;
+	}
+
+	printList(slow);
+	printList(r);
+
+	while (r && slow) {
+		if (slow->val != r->val)
+			return 0;
+		else {
+			slow = slow->next;
+			r = r->next;
+		}
+	}
+	return 1;
+}
+
+struct ListNode* removeElements(struct ListNode* head, int val) {
+	if (!head)
+		return NULL;
+
+	struct ListNode *r, *p, *q;
+	r = p = head;
+	while (p) {
+		q = p->next;
+		if (p->val == val) {
+			if (p == head)
+				r = p = head = head->next;
+			else {
+				r->next = q;
+				free(p);
+				p = q;
+			}
+		} else {
+			r = p;
+			p = p->next;
+		}
+	}
+	return head;
+}
+
+struct ListNode *getIntersectionNode(struct ListNode *headA, struct ListNode *headB) {
+
+}
+
 int main() {
 	struct ListNode *l1, *l2, *l;
-	int a[] = {1, 1};
-	l1 = create(a, 2);
-	int b[] = {1, 2};
-	l2 = create(b, 2);
-	//	l = addTwoNumbers(l1, l2);
+	int a[] = {1,2,3,2,1};
+	l1 = create(a, 5);
+	int b[] = {100, 100, 3, 2, 9, 101, 100};
+	l2 = create(b, 7);
+	l = removeElements(l2, 100);
 	//	int a[] = {1, 2, 3, 4, 5, 6};
 	//	l1 = create(a, 6);
 	//	l = swapPairs(l1);
@@ -526,11 +769,7 @@ int main() {
 	//l = deleteDuplicates(l2);
 	//l = reverseBetween(l1, 2, 4);
 	//l = partition(l1, 2);
-	//l = reverseList(l2);
-	//printList(l);
-	int flag = hasCycle(l2);
-	printf("%d\n", flag);
-
+	printList(l);
 
 	return 0;
 }

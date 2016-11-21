@@ -91,6 +91,33 @@ int treeDeep(struct TreeNode *root) {
 	return 0;
 }
 
+int minDeep(struct TreeNode* root) {
+	int deep = 0;
+	if (root) {
+		int leftDeep = minDeep(root->left);
+		int rightDeep = minDeep(root->right);
+		deep = (leftDeep < rightDeep ? leftDeep : rightDeep) + 1;
+		return deep;
+	}
+	return 0;
+}
+
+int minDepth(struct TreeNode* root) {
+	int deep = 0;
+	if (root) {
+		if (root->left == NULL)
+			return 1 + minDepth(root->right);
+		else if (root->right == NULL)
+			return 1 + minDepth(root->left);
+		else {
+			int depthR = minDeep(root->right) + 1;
+			int depthL = minDeep(root->left) + 1;
+			return 1 + (depthL < depthR ? depthL : depthR);
+		}
+	}
+	return 0;
+}
+
 struct TreeNode* invertTree(struct TreeNode* root) {
 	if (!root) {
 		return NULL;
@@ -291,25 +318,6 @@ char** binaryTreePaths(struct TreeNode* root, int *returnSize) {
 	return NULL;
 }
 
-//TODO
-int* rightSideView(struct TreeNode* root, int* returnSize) {
-	if (root == NULL)
-		return 0;
-	int i = 0;
-	int *nums;
-	nums = (int *)malloc(100 * sizeof(int));
-	struct TreeNode *p = root;
-	while (p) {
-		nums[i++] = p->val;
-		if (p->right)
-			p = p->right;
-		else
-			p = p->left;
-	}
-	*returnSize = i;
-	return nums;
-}
-
 int printNodeAtLevel(struct TreeNode *root, int level) {
 	if (!root || level < 0)
 		return 0;
@@ -340,6 +348,6 @@ int main()
 	//for (i = 0; i < size; i++)
 	//	printf("%d ", a[i]);
 	//printNodeAtLevel(root, 2);
-	printNodeByLevel(root);
+	printf("%d\n", minDepth(root));
 	printf("\n");
 }
