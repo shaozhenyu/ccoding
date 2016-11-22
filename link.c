@@ -262,60 +262,55 @@ struct ListNode* swapPairs(struct ListNode* head) {
 }
 
 struct ListNode* mergeTwoLists(struct ListNode* l1, struct ListNode* l2) {
-	struct ListNode *p, *head;
-
+	struct ListNode *p, *q, *head;
 	struct ListNode *p1, *p2;
 	p1 = l1;
 	p2 = l2;
-
-	if (p1 == NULL && p2 == NULL) {
+	if (p1 == NULL && p2 == NULL)
 		return NULL;
-	}
-
-	if (p1 == NULL) {
+	if (p1 == NULL)
 		return p2;
-	}
-
-	if (p2 == NULL) {
+	if (p2 == NULL)
 		return p1;
-	}
 
-	head = NULL;
+	head = p1;
+	p = NULL;
 	while (p1 && p2) {
 		if (p1->val <=  p2->val) {
-			if (head == NULL) {
-				head = p1;
-				p = head;
-			} else {
-				p->next = p1;
-				p = p->next;
-			}
+			p = p1;
 			p1 = p1->next;
 		} else {
-			if (head == NULL) {
+			q = p2->next;
+			if (p == NULL) {
+				p2->next = p1;
 				head = p2;
 				p = head;
 			} else {
 				p->next = p2;
-				p = p->next;
+				p2->next = p1;
+				p = p2;
 			}
-			p2 = p2->next;
+			p2 = q;
 		}
 	}
-
-	while (p1) {
-		p->next = p1;
-		p = p->next;
-		p1 = p1->next;
-	}
-
-	while (p2) {
+	if (p2)
 		p->next = p2;
-		p = p->next;
-		p2 = p2->next;
-	}
+	return head;
+}
 
-	p->next = NULL;
+struct ListNode* mergeKLists(struct ListNode** lists, int listsSize) {
+	struct ListNode *head = NULL;
+	if (listsSize == 0)
+		return NULL;
+	if (listsSize == 1)
+		return lists[0];
+	if (listsSize > 1)
+		head = mergeTwoLists(lists[0], lists[1]);
+	int n = 2;
+	while (n < listsSize) {
+		head = mergeTwoLists(head, lists[n]);
+		n++;
+	}
 	return head;
 }
 
@@ -326,7 +321,7 @@ struct ListNode* mergeTwoLists(struct ListNode* l1, struct ListNode* l2) {
  *     struct ListNode *next;
  * };
  */
-struct ListNode* deleteDuplicates(struct ListNode* head) {
+struct ListNode* deleteDuplicates1(struct ListNode* head) {
 	struct ListNode *p, *q, *r;
 
 	r = p = q = head;
@@ -750,26 +745,238 @@ struct ListNode* removeElements(struct ListNode* head, int val) {
 }
 
 struct ListNode *getIntersectionNode(struct ListNode *headA, struct ListNode *headB) {
+	if (!headA || !headB)
+		return NULL;
+	int a[10000] = {0};
+	int b[10000] = {0};
+	struct ListNode *p = headA, *q = headB;
+	int lenA = 0, lenB = 0;
+	while (p && q) {
+		a[lenA++] = p->val;
+		p = p->next;
+		b[lenB++] = q->val;
+		q = q->next;
+	}
+	while (p) {
+		a[lenA++] = p->val;
+		p = p->next;
+	}
+	while (q) {
+		b[lenB++] = q->val;
+		q = q->next;
+	}
+	int i = lenA - 1, j = lenB - 1;
+	int same = 0;
+	while (i >= 0 && j >= 0) {
+		if (a[i--] == b[j--])
+			same++;
+	}
+	if (same == 0)
+		return NULL;
 
+	i = 0;
+	if (lenA <= lenB) {
+		p = headA;
+		while (i < (lenA - same)) {
+			p = p->next;
+			i++;
+		}
+	} else {
+		p = headB;
+		while (i < (lenB - same)) {
+			p = p->next;
+			i++;
+		}
+	}
+
+	return p;
+}
+struct ListNode *getIntersectionNode2(struct ListNode *headA, struct ListNode *headB) {
+	if (!headA || !headB)
+		return NULL;
+	struct ListNode *a = headA, *b = headB, *ra, *rb, *na, *nb, *p;
+	ra = rb = NULL;
+	while (a && b && a->next && b->next) {
+		na = a->next;
+		a->next = ra;
+		ra = a;
+		a = na;
+
+		nb = b->next;
+		b->next = rb;
+		rb = b;
+		b = nb;
+	}
+
+	while (a && a->next) {
+		na = a->next;
+		a->next = ra;
+		ra = a;
+		a = na;
+	}
+	while (b && b->next) {
+		nb = b->next;
+		b->next = rb;
+		rb = b;
+		b = nb;
+	}
+
+	if (a->val != b->val)
+		return NULL;
+	while (ra && rb) {
+		if (ra->val != rb->val)
+			break;
+		p = ra->next;
+		ra->next = a;
+		a = ra;
+		ra = p;
+		rb = rb->next;
+	}
+	return a;
+}
+
+struct ListNode *getIntersectionNode1(struct ListNode *headA, struct ListNode *headB) {
+	if (!headA || !headB)
+		return NULL;
+	struct ListNode *p = headA, *q = headB, *p1, *q1, *p2, *q2;
+	while (p) {
+		p1 = p;
+		q1 = q;
+		while (q1 && p1) {
+			printf("q1->val %d p1->val %d\n", q1->val, p1->val);
+			if (q1->val == p1->val) {
+				p2 = p1;
+				q2 = q1;
+				while (q2 && p2) {
+					q2 = q2->next;
+					p2 = p2->next;
+					if (!q2 || !p2)
+						break;
+					if (q2->val != p2->val) {
+						break;
+					}
+				}
+				if (!q2 && !p2) {
+					return p1;
+				} else {
+					q1 = q1->next;
+				}
+			} else {
+				q1 = q1->next;
+			}
+		}
+		p = p->next;
+	}
+	return NULL;
+}
+
+struct ListNode* reverseKGroup(struct ListNode* head, int k) {
+	if (!head || !head->next)
+		return head;
+	int n, m;
+	struct ListNode *start, *startPre, *now, *nowNext, *nowPre, *p;
+	struct ListNode *ret;
+	ret = startPre = NULL;
+	start = nowPre = head;
+	now = head->next;
+	while (now) {
+		m = n = k-1;
+		p = now;
+		int flag = 1;
+		while (m--) {
+			if (!p)
+				break;
+			p = p->next;
+		}
+		if (m >= 0)
+			flag = 0;
+		while (n-- && flag) {
+			if (!now)
+				break;
+			if (!startPre) {
+				nowNext = now->next;
+				now->next = start;
+				nowPre->next = nowNext;
+				start = now;
+				now = nowNext;
+			} else {
+				//printf("sssss\n");
+				nowNext = now->next;
+				startPre->next = now;
+				now->next = start;
+				nowPre->next = nowNext;
+				now = nowNext;
+				start = startPre->next;
+			}
+		}
+		if (startPre == NULL)
+			head = start;
+		//printf("head : ");
+		//printList(head);
+		if (!flag || !now)
+			return head;
+		startPre = nowPre;
+		start = now;
+		nowPre = now;
+		now = now->next;
+		//printf("%d %d %d %d %d\n", nowPre->val, now->val, nowNext->val, start->val, startPre->val);
+	}
+	return head;
+}
+struct ListNode* deleteDuplicates(struct ListNode* head) {
+	if (!head || !head->next)
+		return head;
+	struct ListNode *p = head, *pPre, *pNext;
+	pPre = NULL;
+	int same;
+	while (p->next) {
+		same = 0;
+		pNext = p->next;
+		while (pNext && p->val == pNext->val) {
+			same = 1;
+			pNext = pNext->next;
+		}
+		if (same == 1) {
+			if (pNext == NULL) {
+				if (pPre == NULL)
+					return NULL;
+				else {
+					pPre->next = NULL;
+					return head;
+				}
+			} else {
+				if (pPre == NULL)
+					head = pNext;
+				else
+					pPre->next = pNext;
+			}
+
+			if (pPre == NULL)
+				p = head;
+			else
+				p = pPre->next;
+		} else {
+			pPre = p;
+			p = p->next;
+		}
+	}
+	return head;
 }
 
 int main() {
-	struct ListNode *l1, *l2, *l;
-	int a[] = {1,2,3,2,1};
-	l1 = create(a, 5);
-	int b[] = {100, 100, 3, 2, 9, 101, 100};
-	l2 = create(b, 7);
-	l = removeElements(l2, 100);
-	//	int a[] = {1, 2, 3, 4, 5, 6};
-	//	l1 = create(a, 6);
-	//	l = swapPairs(l1);
-
-	//l = mergeTwoLists(l1, l2);
-
-	//l = deleteDuplicates(l2);
-	//l = reverseBetween(l1, 2, 4);
-	//l = partition(l1, 2);
+	struct ListNode *l1, *l2,*l3, *l;
+	int a[] = {1};
+	l1 = create(a, 1);
+	int b[] = {2};
+	l2 = create(b, 1);
+	int c[] = {3};
+	l3 = create(c, 1);
+	l = mergeTwoLists(l1,l2);
+	printf("aa: ");
 	printList(l);
-
+	printList(l3);
+	l = mergeTwoLists(l,l3);
+	printf("bb: ");
+	printList(l);
 	return 0;
 }
