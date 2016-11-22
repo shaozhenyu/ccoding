@@ -963,20 +963,108 @@ struct ListNode* deleteDuplicates(struct ListNode* head) {
 	return head;
 }
 
+void reorderList(struct ListNode* head) {
+	if (!head || !head->next || !head->next->next)
+		return;
+	int i, len;
+	struct ListNode *p = head, *last, *q, *qPre, *qNext, *lastNext;
+	while (p) {
+		len++;
+		last = p;
+		p = p->next;
+	}
+	p = q =  head;
+	for (i = 0; i < len/2; i++) {
+		qPre = q;
+		q = q->next;
+		qNext = q->next;
+	}
+	while (qNext != last->next) {
+		if (last->next == NULL) {
+			last->next = q;
+			lastNext = q;
+			lastNext->next = NULL;
+			qPre->next = qNext;
+			q = qNext;
+			qNext = q->next;
+		} else {
+			last->next = q;
+			q->next = lastNext;
+			lastNext = q;
+			qPre->next = qNext;
+			q = qNext;
+			qNext = q->next;
+		}
+	}
+	printList(head);
+	qPre = head;
+	q = head->next;
+	qNext = q->next;
+	lastNext = last->next;
+	p = last;
+	while (q != p) {
+		last->next = q;
+		q->next = lastNext;
+		qPre->next = qNext;
+		q = qNext;
+		qNext = q->next;
+		last = lastNext;
+		lastNext = last->next;
+	}
+	printList(head);
+}
+
+struct ListNode* rotateRight(struct ListNode* head, int k) {
+	if (!head || !head->next || k == 0)
+		return head;
+	int len = listLen(head);
+	if (k%len == 0)
+		return head;
+	if (len < k) {
+		k = k%len;
+	}
+	struct ListNode *p = head, *pre, *q;
+	pre = q = NULL;
+	int i = len - k;
+	while (i) {
+		pre = p;
+		p = p->next;
+		i--;
+		printf("aaa\n");
+	}
+	q = p;
+	while (q->next) {
+		q = q->next;
+	}
+
+	printf("q %d pre %d\n", q->val, pre->val);
+	q->next = head;
+	pre->next = NULL;
+	return p;
+}
+
+struct ListNode* sortList(struct ListNode* head) {
+	if (!head || !head->next)
+		return head;
+	struct *p, *q, *mid;
+	mid = head;
+	p = head->next;
+
+	while (p) {
+		if (p->val < mid->val) {
+			
+		} else {
+			p = p->next;
+		}
+	}
+}
+
 int main() {
 	struct ListNode *l1, *l2,*l3, *l;
-	int a[] = {1};
-	l1 = create(a, 1);
+	int a[] = {1,2,3};
+	l1 = create(a, 3);
 	int b[] = {2};
 	l2 = create(b, 1);
-	int c[] = {3};
-	l3 = create(c, 1);
-	l = mergeTwoLists(l1,l2);
-	printf("aa: ");
-	printList(l);
-	printList(l3);
-	l = mergeTwoLists(l,l3);
-	printf("bb: ");
-	printList(l);
+	reorderList(l1);
 	return 0;
 }
