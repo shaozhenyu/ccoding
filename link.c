@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct ListNode {
 	int val;
@@ -260,20 +261,18 @@ struct ListNode* swapPairs(struct ListNode* head) {
 
 	return head;
 }
-
 struct ListNode* mergeTwoLists(struct ListNode* l1, struct ListNode* l2) {
 	struct ListNode *p, *q, *head;
 	struct ListNode *p1, *p2;
-	p1 = l1;
-	p2 = l2;
-	if (p1 == NULL && p2 == NULL)
+	if (l1 == NULL && l2 == NULL)
 		return NULL;
-	if (p1 == NULL)
-		return p2;
-	if (p2 == NULL)
-		return p1;
+	if (l1 == NULL)
+		return l2;
+	if (l2 == NULL)
+		return l1;
 
-	head = p1;
+	head = p1 = l1;
+	p2 = l2;
 	p = NULL;
 	while (p1 && p2) {
 		if (p1->val <=  p2->val) {
@@ -304,12 +303,20 @@ struct ListNode* mergeKLists(struct ListNode** lists, int listsSize) {
 		return NULL;
 	if (listsSize == 1)
 		return lists[0];
-	if (listsSize > 1)
-		head = mergeTwoLists(lists[0], lists[1]);
-	int n = 2;
-	while (n < listsSize) {
-		head = mergeTwoLists(head, lists[n]);
-		n++;
+	if (listsSize == 2)
+		return mergeTwoLists(lists[0], lists[1]);
+	if (listsSize > 2) {
+		struct ListNode *q;
+		struct ListNode *p = mergeKLists(lists, listsSize/2);
+		int len;
+		if (listsSize%2 != 0) {
+			len = listsSize/2 + 1;
+			q = mergeKLists(lists+len-1, len);
+		} else {
+			len = listsSize/2;
+			q = mergeKLists(lists+len, len);
+		}
+		head = mergeTwoLists(p, q);
 	}
 	return head;
 }
@@ -1046,25 +1053,62 @@ struct ListNode* rotateRight(struct ListNode* head, int k) {
 struct ListNode* sortList(struct ListNode* head) {
 	if (!head || !head->next)
 		return head;
-	struct *p, *q, *mid;
-	mid = head;
+	struct ListNode *mid, *midPre;
+	struct ListNode *p, *pPre, *pNext;
+	midPre = NULL;
+	pPre = mid = head;
 	p = head->next;
-
 	while (p) {
 		if (p->val < mid->val) {
-			
+			pNext = p->next;
+			if (midPre == NULL) {
+				p->next = head;
+				head = p;
+				pPre->next = pNext;
+				p = pNext;
+				midPre = head;
+			} else {
+				midPre->next = p;
+				p->next = mid;
+				pPre->next = pNext;
+				p = pNext;
+				midPre = midPre->next;
+			}
 		} else {
+			pPre = p;
 			p = p->next;
 		}
 	}
+	p = mid;
+	if (!midPre) {
+		struct ListNode *k = head, *kPre;
+		while (k->val == head->val) {
+			kPre = k;
+			k = k->next;
+			if (!k)
+				return head;
+		}
+		kPre->next = sortList(k);
+		return head;
+	} else {
+		midPre->next = NULL;
+		head = sortList(head);
+	}
+	struct ListNode *k = head;
+	while (k->next)
+		k = k->next;
+	k->next = p;
+	p->next = sortList(p->next);
+	return head;
 }
 
 int main() {
 	struct ListNode *l1, *l2,*l3, *l;
-	int a[] = {1,2,3};
-	l1 = create(a, 3);
+	int a[] = {11,1,4,6,10,5,1,2,8,9,3,7,12,13};
+	l1 = create(a, 14);
 	int b[] = {2};
 	l2 = create(b, 1);
-	reorderList(l1);
+	l = sortList(l1);
+	printList(l);
 	return 0;
 }
