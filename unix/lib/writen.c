@@ -18,5 +18,11 @@ ssize_t writen(int fd, const void *vptr, size_t n)
 		nleft -= nwritten;
 		ptr += nwritten;
 	}
-	return 0;
+	return n;
+}
+
+void Writen(int fd, void *ptr, size_t nbytes)
+{
+	if (write(fd, ptr, nbytes) != nbytes)
+		err_sys("writen eror");
 }

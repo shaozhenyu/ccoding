@@ -8,6 +8,7 @@ int main(int argc, char **argv)
 	pid_t childpid;
 	socklen_t clilen;
 	struct sockaddr_in cliaddr, servaddr;
+	void sig_chld(int);
 
 	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
@@ -26,16 +27,22 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	Signal(SIGCHLD, sig_chld);
+
 	for ( ; ; ) {
 		clilen = sizeof(cliaddr);
-		connfd = accept(listenfd, (SA *)&cliaddr, &clilen);
+		if ((connfd = accept(listenfd, (SA *)&cliaddr, &clilen)) < 0) {
+			if (errno == EINTR)
+				continue;
+			else
+				err_sys("accept error");
+		}
 
 		if ((childpid = fork()) == 0) {
 			close(listenfd);
 			str_echo(connfd);
 			exit(0);
 		}
-
 		close(connfd);
 	}
 }
